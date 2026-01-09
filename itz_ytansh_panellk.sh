@@ -11,12 +11,12 @@ echo "██║   ██║   ███████╗        ██║      █
 echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
 echo -e "\e[0m"
 echo
-echo "=========== ITZ_YTANSH Teryx Hosting Installer (CodeSandBox) ==========="
+echo "+=========== ITZ_YTANSH  Hosting Installer (CodeSandBox) ===========+"
 echo "1) 🔥 Install Panel"
 echo "2) ⚡ Install Node"
 echo "3) ❤️ Subscribe to ITZ_YTANSH "
 echo "4) ➡️ Exit"
-echo "================================================================"
+echo "+================================================================+"
 read -p "Select option: " opt
 
 # ---------- PANEL ----------
@@ -37,23 +37,33 @@ echo "⚙️ Cloning Panel Files...."
   git clone https://github.com/teryxlabs/v4panel
   cd v4panel
 
+echo "📂 Unziping Panel Files.."
+
   apt install zip -y
   unzip panel.zip || true
 
   npm install
   npm run seed
-  npm run createUser
 
-  pm2 start index.js --name teryx-panel
+  echo "▶️ Creating User For Panel"
+  
+  npm run createUser
+🚀 Launching setup process
+echo "🚀 Launching Panel"
+
+  pm2 start index.js --name panel
   pm2 save
   pm2 startup
 
   echo
   echo "======================================"
   echo "✅  PANEL INSTALLED SUCCESSFULLY"
-  echo "🌐 Panel is now Live In Port 3999 (24/7)"
+  echo "🌐 Panel is now Live In Port 3000"
   echo "💡 Use: pm2 list For 💥 Info"
+  echo "👑 Owner Of Panel: **HopingBoyz**"
   echo "======================================"
+
+  echo "🧩 For Node Relauch The Cmd!"
 }
 
 # ---------- DAEMON ----------
@@ -67,6 +77,8 @@ install_daemon() {
   apt update -y
   apt install -y nodejs git zip unzip
   npm install -g pm2
+
+ echo "⚙️ Cloning Panel Files...."
 
   cd /opt
   git clone https://github.com/dragonlabsdev/daemon
@@ -112,7 +124,7 @@ install_daemon() {
   echo
   echo "======================================"
   echo "✅ DAEMON INSTALLED & RUNNING"
-  echo "⏱️ Delay handled + unzip safe"
+  echo "⏱️ Subscribe TO ITZ_YTANSH"
   echo "======================================"
 }
 # ---------- SUBSCRIBE ----------
