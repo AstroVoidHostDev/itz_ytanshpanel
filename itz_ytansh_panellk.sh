@@ -1,99 +1,106 @@
 #!/bin/bash
+set -e
 
-# ========== COLORS ==========
-BOLD="\e[1m"
-CYAN="\e[36m"
+# ===============================
+# Colors & Emojis
+# ===============================
 GREEN="\e[32m"
-YELLOW="\e[33m"
 RED="\e[31m"
+CYAN="\e[36m"
+YELLOW="\e[33m"
 RESET="\e[0m"
 
+# ===============================
+# Banner
+# ===============================
 clear
-
-# ========== BANNER ==========
-echo -e "${BOLD}${CYAN}"
+echo -e "${CYAN}"
 echo "██╗████████╗███████╗     ██╗   ██╗████████╗ █████╗ ███╗   ██╗███████╗██╗  ██╗"
 echo "██║╚══██╔══╝╚══███╔╝     ╚██╗ ██╔╝╚══██╔══╝██╔══██╗████╗  ██║██╔════╝██║  ██║"
 echo "██║   ██║     ███╔╝       ╚████╔╝    ██║   ███████║██╔██╗ ██║███████╗███████║"
 echo "██║   ██║    ███╔╝         ╚██╔╝     ██║   ██╔══██║██║╚██╗██║╚════██║██╔══██║"
 echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
 echo -e "${RESET}"
-echo -e "${BOLD}${YELLOW}🚀 ITZ_YTANSH PANEL & DAEMON ONE-CLICK INSTALLER${RESET}\n"
+echo -e "🚀 ${GREEN}ITZ_YTANSH PROFESSIONAL INSTALLER${RESET}"
+echo ""
 
-# ========== MENU ==========
-echo -e "${GREEN}[1] Install Teryx Panel"
-echo -e "[2] Install Teryx Daemon${RESET}\n"
-read -p "👉 Choose option (1/2): " opt
+# ===============================
+# Menu
+# ===============================
+echo -e "${YELLOW}Select what to install:${RESET}"
+echo "1️⃣  Teryx Panel"
+echo "2️⃣  Teryx Daemon"
+read -p "👉 Enter choice (1/2): " CHOICE
 
-# ========== COMMON DEPENDENCIES ==========
-install_common() {
-  echo -e "${CYAN}🔧 Installing dependencies...${RESET}"
-  apt update -y
-  apt install -y git curl unzip zip
-  curl -fsSL https://deb.nodesource.com/setup_23.x | bash -
-  apt install -y nodejs
-  npm install -g pm2
-}
+# ===============================
+# Dependencies
+# ===============================
+echo -e "\n📦 Installing dependencies..."
+apt update -y
+apt install -y git curl zip unzip
 
-# ========== PANEL ==========
-install_panel() {
-  install_common
+curl -fsSL https://deb.nodesource.com/setup_23.x | bash -
+apt install -y nodejs
 
-  echo -e "${CYAN}📥 Cloning Teryx Panel...${RESET}"
-  rm -rf v4panel
+# ===============================
+# PANEL INSTALL
+# ===============================
+if [[ "$CHOICE" == "1" ]]; then
+  echo -e "\n📥 Cloning Teryx Panel..."
   git clone https://github.com/teryxlabs/v4panel.git
+  cd v4panel
 
-  cd v4panel || exit 1
+  # 🔍 AUTO FIND package.json
+  if [[ -f "panel/package.json" ]]; then
+    cd panel
+  else
+    echo -e "${RED}❌ package.json not found. Install failed.${RESET}"
+    exit 1
+  fi
 
-  echo -e "${CYAN}📦 Installing panel dependencies...${RESET}"
+  echo -e "\n📦 Installing panel dependencies..."
   npm install
 
-  echo -e "${CYAN}🌱 Seeding database...${RESET}"
+  echo -e "\n🌱 Seeding database..."
   npm run seed
 
-  echo -e "${CYAN}👤 Create admin account (email/username/password)...${RESET}"
+  echo -e "\n👤 Creating admin user..."
   npm run createUser
 
-  read -p "▶️ Start panel now? (yes/no): " startp
-  if [[ "$startp" == "yes" ]]; then
-    pm2 start node --name teryx-panel -- .
-    pm2 save
-    echo -e "${GREEN}✅ Panel started successfully 🎉${RESET}"
-    pm2 list
+  read -p "▶️ Start Panel now? (yes/no): " START_PANEL
+  if [[ "$START_PANEL" == "yes" ]]; then
+    echo -e "${GREEN}🚀 Starting Panel...${RESET}"
+    node .
   else
-    echo -e "${YELLOW}⏸ Panel installed but not started${RESET}"
+    echo -e "ℹ️ You can start later using: node ."
   fi
-}
+fi
 
-# ========== DAEMON ==========
-install_daemon() {
-  install_common
-
-  echo -e "${CYAN}📥 Cloning Teryx Daemon...${RESET}"
-  rm -rf daemon
+# ===============================
+# DAEMON INSTALL
+# ===============================
+if [[ "$CHOICE" == "2" ]]; then
+  echo -e "\n📥 Cloning Teryx Daemon..."
   git clone https://github.com/teryxlabs/daemon.git
+  cd daemon
 
-  cd daemon || exit 1
+  if [[ -f "daemon/package.json" ]]; then
+    cd daemon
+  else
+    echo -e "${RED}❌ package.json not found in daemon.${RESET}"
+    exit 1
+  fi
 
-  echo -e "${CYAN}📦 Installing daemon dependencies...${RESET}"
+  echo -e "\n📦 Installing daemon dependencies..."
   npm install
 
-  echo -e "${CYAN}⚙️ Configure daemon files as required (.env, node id, etc)${RESET}"
-
-  read -p "▶️ Start daemon now? (yes/no): " startd
-  if [[ "$startd" == "yes" ]]; then
-    pm2 start node --name teryx-daemon -- .
-    pm2 save
-    echo -e "${GREEN}✅ Daemon started successfully 🚀${RESET}"
-    pm2 list
+  read -p "▶️ Start Daemon now? (yes/no): " START_DAEMON
+  if [[ "$START_DAEMON" == "yes" ]]; then
+    echo -e "${GREEN}🚀 Starting Daemon...${RESET}"
+    node .
   else
-    echo -e "${YELLOW}⏸ Daemon installed but not started${RESET}"
+    echo -e "ℹ️ You can start later using: node ."
   fi
-}
+fi
 
-# ========== RUN ==========
-case $opt in
-  1) install_panel ;;
-  2) install_daemon ;;
-  *) echo -e "${RED}❌ Invalid option${RESET}" ;;
-esac
+echo -e "\n✅ ${GREEN}Installation completed successfully!${RESET}"
