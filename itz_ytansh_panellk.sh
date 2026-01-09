@@ -66,64 +66,10 @@ echo "🚀 Launching Panel"
 }
 
 # ---------- DAEMON ----------
-install_daemon() {
-
-  read -p "⚙️ Are you sure you want to install? (yes/no): " confirm
-[[ "$confirm" == "yes" ]] || { echo "❌ Installation cancelled"; exit 1; }
-
-  echo "⚙️ Installing Draco Daemon..."
-
-  apt update -y
-  apt install -y nodejs git zip unzip
-  npm install -g pm2
-
- echo "⚙️ Cloning Panel Files...."
-
-  cd /opt
-  git clone https://github.com/dragonlabsdev/daemon
-
-  cd daemon
-
-  echo
-  echo "⏳ Waiting 5 seconds..."
-  sleep 5
-
-  # unzip only if zip exists
-  if [ -f "daemon.zip" ]; then
-    echo "📦 daemon.zip found, extracting..."
-    unzip daemon.zip
-    cd daemon || true
-  else
-    echo "ℹ️ No daemon.zip found, continuing with cloned files"
-  fi
-
-  echo "📦 Installing dependencies..."
-  npm install
-
-  echo
-  echo "🔧 CONFIGURE DAEMON"
-  echo -e "\e[90mExample:\e[0m"
-  echo -e "\e[90mnpm run configure -- --panel http://panel.example.com --key d542xxxx-0xxx-45xx-b4xx-xxxxxxxxxx\e[0m"
-  echo
-  read -p "Paste command: " USER_CMD
-
-  FIXED_CMD=$(echo "$USER_CMD" | sed -E 's|--panel https?://[^ ]+|--panel http://localhost:3000|')
-
-  echo
-  echo "✅ Running:"
-  echo -e "\e[92m$FIXED_CMD\e[0m"
-  echo
-
-  eval $FIXED_CMD
-
-  
-
-  echo " To Make Online 🚀 Your Node Do (node .)"
-  echo "======================================"
-  echo "✅ DAEMON INSTALLED "
-  echo "⏱️ Subscribe TO ITZ_YTANSH"
-  echo "======================================"
-}
+echo
+echo "🛠️  Node / Daemon is currently not available"
+echo "⏳ The service is being initialized. Please wait..."
+echo "🛡️  Bye Bye"
 # ---------- SUBSCRIBE ----------
 subscribe() {
   clear
