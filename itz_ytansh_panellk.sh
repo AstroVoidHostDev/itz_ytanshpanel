@@ -19,7 +19,7 @@ echo "██║   ██║    ███╔╝         ╚██╔╝     █�
 echo "██║   ██║   ███████╗        ██║      ██║   ██║  ██║██║ ╚████║███████║██║  ██║"
 echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
 echo -e "${RESET}"
-echo -e "${BOLD}${YELLOW}        🚀 ITZ_YTANSH ATERNOS 24X7 CREATOR 🚀${RESET}"
+echo -e "${BOLD}${YELLOW}        🚀 ITZ_YTANSH Teryx Panel&Deamon Installer 🚀${RESET}"
 echo
 }
 
