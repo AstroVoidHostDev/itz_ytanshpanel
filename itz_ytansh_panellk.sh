@@ -60,28 +60,36 @@ install_daemon() {
 
   cd /opt
   git clone https://github.com/dragonlabsdev/daemon
+
   cd daemon
 
-  apt install zip -y
-  unzip daemon.zip || true
-  cd daemon || true
+  echo
+  echo "⏳ Waiting 5 seconds..."
+  sleep 5
 
+  # unzip only if zip exists
+  if [ -f "daemon.zip" ]; then
+    echo "📦 daemon.zip found, extracting..."
+    unzip daemon.zip
+    cd daemon || true
+  else
+    echo "ℹ️ No daemon.zip found, continuing with cloned files"
+  fi
+
+  echo "📦 Installing dependencies..."
   npm install
 
   echo
-  echo "🔑 CONFIGURE DAEMON WITH PANEL"
-  echo
-  echo -e "\e[90mExample command:\e[0m"
+  echo "🔧 CONFIGURE DAEMON"
+  echo -e "\e[90mExample:\e[0m"
   echo -e "\e[90mnpm run configure -- --panel http://panel.example.com --key d542xxxx-0xxx-45xx-b4xx-xxxxxxxxxx\e[0m"
   echo
-  echo "👇 Paste your REAL command below:"
-  read -p "> " USER_CMD
+  read -p "Paste command: " USER_CMD
 
-  # replace panel URL with localhost
   FIXED_CMD=$(echo "$USER_CMD" | sed -E 's|--panel https?://[^ ]+|--panel http://localhost:3000|')
 
   echo
-  echo "✅ Using fixed command:"
+  echo "✅ Running:"
   echo -e "\e[92m$FIXED_CMD\e[0m"
   echo
 
@@ -93,9 +101,8 @@ install_daemon() {
 
   echo
   echo "======================================"
-  echo "✅ DAEMON CONFIGURED & STARTED"
-  echo "🔗 Panel URL forced to http://localhost:3000"
-  echo "⚙️ Running with PM2 (24/7)"
+  echo "✅ DAEMON INSTALLED & RUNNING"
+  echo "⏱️ Delay handled + unzip safe"
   echo "======================================"
 }
 # ---------- SUBSCRIBE ----------
