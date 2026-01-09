@@ -1,62 +1,98 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Starting Panel Installation..."
+clear
+echo "========================================="
+echo "   ITZ_YTANSH – Teryx Panel & Daemon"
+echo "========================================="
+echo "1) Install Teryx Panel"
+echo "2) Install Draco Daemon"
+echo "3) Install BOTH (Panel + Daemon)"
+echo "4) Exit"
+echo "========================================="
+read -p "Select option: " opt
 
-# ---- Requirements ----
+# ---------- COMMON ----------
 apt update -y
-apt install -y curl git unzip nodejs npm
+apt install -y curl git zip unzip
 
-# ---- Clone Panel Repo ----
-echo "📥 Cloning Panel Repository..."
-git clone https://github.com/AstroVoidHostDev/itz_ytanshpanel.git v4panel
-cd v4panel
-
-# ---- Extract Panel ----
-if [ ! -f panel.zip ]; then
-  echo "❌ panel.zip not found!"
-  exit 1
+if ! command -v node >/dev/null 2>&1; then
+  curl -sL https://deb.nodesource.com/setup_23.x | bash -
+  apt install -y nodejs
 fi
 
-echo "📦 Extracting panel.zip..."
-unzip -o panel.zip
+npm install -g pm2
 
-# ---- Check package.json ----
-if [ ! -f package.json ]; then
-  echo "❌ package.json missing after unzip!"
-  exit 1
-fi
+# ---------- PANEL ----------
+install_panel() {
+  echo "🚀 Installing Teryx Panel..."
 
-# ---- Install Node Modules ----
-echo "📦 Installing Node dependencies..."
-npm install
+  cd /opt
+  git clone https://github.com/teryxlabs/v4panel.git
+  cd v4panel
 
-# ---- Config Setup ----
-echo "⚙️ Panel Configuration"
-read -p "Admin Email: " P_EMAIL
-read -p "Admin Username: " P_USER
-read -s -p "Admin Password: " P_PASS
-echo ""
+  npm install
+  npm run seed
 
-cat > config.json <<EOF
+  echo "👤 Create Admin User"
+  npm run createUser
+
+  # generate panel key
+  PANEL_KEY=$(openssl rand -hex 32)
+
+  cat > config.json <<EOF
 {
-  "port": 3000,
-  "sessionSecret": "CHANGE_ME_SECRET",
-  "remoteKey": "CHANGE_ME_DAEMON_KEY",
-  "admin": {
-    "email": "$P_EMAIL",
-    "username": "$P_USER",
-    "password": "$P_PASS"
-  }
+  "panelKey": "$PANEL_KEY",
+  "port": 3000
 }
 EOF
 
-echo "✅ Panel Config Saved"
+  pm2 start index.js --name teryx-panel
+  pm2 save
+  pm2 startup systemd -u root --hp /root
 
-# ---- Start Panel ----
-read -p "🚀 Start Panel now? (yes/no): " START
-if [[ "$START" == "yes" ]]; then
-  node index.js
-else
-  echo "ℹ️ Start later using: cd v4panel && node index.js"
-fi
+  echo "✅ Panel Installed"
+  echo "🔑 PANEL API KEY: $PANEL_KEY"
+}
+
+# ---------- DAEMON ----------
+install_daemon() {
+  echo "⚙️ Installing Draco Daemon..."
+
+  cd /opt
+  git clone https://github.com/dragonlabsdev/daemon.git
+  cd daemon
+
+  npm install
+
+  read -p "🌐 Enter PANEL URL (http://IP:3000): " PANEL_URL
+  read -p "🔑 Enter PANEL API KEY: " PANEL_KEY
+
+  DAEMON_KEY=$(openssl rand -hex 32)
+
+  cat > .env <<EOF
+PANEL_URL=$PANEL_URL
+REMOTE_KEY=$PANEL_KEY
+DAEMON_KEY=$DAEMON_KEY
+PORT=8080
+EOF
+
+  pm2 start index.js --name draco-daemon
+  pm2 save
+
+  echo "✅ Daemon Installed"
+  echo "🔑 DAEMON KEY: $DAEMON_KEY"
+  echo "👉 Paste this DAEMON KEY in Panel config"
+}
+
+# ---------- MENU LOGIC ----------
+case $opt in
+  1) install_panel ;;
+  2) install_daemon ;;
+  3)
+     install_panel
+     install_daemon
+     ;;
+  4) exit ;;
+  *) echo "❌ Invalid option" ;;
+esac
