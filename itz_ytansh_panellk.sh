@@ -58,6 +58,7 @@ install_daemon() {
   apt install -y nodejs git zip unzip
   npm install -g pm2
 
+  cd /opt
   git clone https://github.com/dragonlabsdev/daemon
   cd daemon
 
@@ -68,11 +69,23 @@ install_daemon() {
   npm install
 
   echo
-  echo "🔑 ENTER PANEL TOKEN TO START DAEMON"
-  echo -e "\e[90mExample: 9f3a1c8e2b6d4a0f8c9e7d1b3a5f6c2d\e[0m"
-  read -p "Paste Panel Token: " PANEL_TOKEN
+  echo "🔑 CONFIGURE DAEMON WITH PANEL"
+  echo
+  echo -e "\e[90mExample command:\e[0m"
+  echo -e "\e[90mnpm run configure -- --panel http://panel.example.com --key d542xxxx-0xxx-45xx-b4xx-xxxxxxxxxx\e[0m"
+  echo
+  echo "👇 Paste your REAL command below:"
+  read -p "> " USER_CMD
 
-  echo "REMOTE_KEY=$PANEL_TOKEN" > .env
+  # replace panel URL with localhost
+  FIXED_CMD=$(echo "$USER_CMD" | sed -E 's|--panel https?://[^ ]+|--panel http://localhost:3000|')
+
+  echo
+  echo "✅ Using fixed command:"
+  echo -e "\e[92m$FIXED_CMD\e[0m"
+  echo
+
+  eval $FIXED_CMD
 
   pm2 start index.js --name draco-daemon
   pm2 save
@@ -80,12 +93,11 @@ install_daemon() {
 
   echo
   echo "======================================"
-  echo "✅ DAEMON STARTED SUCCESSFULLY"
+  echo "✅ DAEMON CONFIGURED & STARTED"
+  echo "🔗 Panel URL forced to http://localhost:3000"
   echo "⚙️ Running with PM2 (24/7)"
-  echo "💡 Use: pm2 logs draco-daemon"
   echo "======================================"
 }
-
 # ---------- SUBSCRIBE ----------
 subscribe() {
   clear
@@ -93,7 +105,7 @@ subscribe() {
   echo "❤️ SUPPORT & SUBSCRIBE ❤️"
   echo
   echo "👉 https://www.youtube.com/@ITZ_YT_ANSH_OFFICIAL"
-  echo
+  echo "Thanks For Using Cmd Also!!"
 }
 
 case $opt in
