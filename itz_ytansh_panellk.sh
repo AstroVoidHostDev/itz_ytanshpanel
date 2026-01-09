@@ -66,7 +66,7 @@ echo "🚀 Launching Panel"
 }
 
 # ---------- DAEMON ----------
-Node() {
+install_node() {
 
 echo
 echo "🚧 Node / Daemon is not available yet"
@@ -94,7 +94,7 @@ subscribe() {
 
 case $opt in
   1) install_panel ;;
-  2) install_daemon ;;
+  2) install_node ;;
   3) subscribe ;;
   4) exit ;;
   *) echo "❌ Invalid option" ;;
