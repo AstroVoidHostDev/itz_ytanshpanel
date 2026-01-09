@@ -11,22 +11,28 @@ echo "██║   ██║   ███████╗        ██║      █
 echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
 echo -e "\e[0m"
 echo
-echo "=========== ITZ_YTANSH Teryx Panel & Daemon Installer ==========="
-echo "1) Install Teryx Panel"
-echo "2) Install Draco Daemon"
-echo "3) Subscribe to ITZ_YTANSH ❤️"
-echo "4) Exit"
+echo "=========== ITZ_YTANSH Teryx Hosting Installer (CodeSandBox) ==========="
+echo "1) 🔥 Install Panel"
+echo "2) ⚡ Install Node"
+echo "3) ❤️ Subscribe to ITZ_YTANSH "
+echo "4) ➡️ Exit"
 echo "================================================================"
 read -p "Select option: " opt
 
 # ---------- PANEL ----------
 install_panel() {
-  echo "🚀 Installing Teryx Panel..."
+
+  read -p "⚙️ Are you sure you want to install? (yes/no): " confirm
+[[ "$confirm" == "yes" ]] || { echo "❌ Installation cancelled"; exit 1; }
+
+  echo "🚀 Installing Panel..."
 
   apt update -y
   curl -sL https://deb.nodesource.com/setup_23.x | bash -
   apt-get install -y nodejs git zip unzip
   npm install -g pm2
+
+echo "⚙️ Cloning Panel Files...."
 
   git clone https://github.com/teryxlabs/v4panel
   cd v4panel
@@ -44,14 +50,18 @@ install_panel() {
 
   echo
   echo "======================================"
-  echo "✅ TERYX PANEL INSTALLED SUCCESSFULLY"
-  echo "🌐 Panel is now running with PM2 (24/7)"
-  echo "💡 Use: pm2 logs teryx-panel"
+  echo "✅  PANEL INSTALLED SUCCESSFULLY"
+  echo "🌐 Panel is now Live In Port 3999 (24/7)"
+  echo "💡 Use: pm2 list For 💥 Info"
   echo "======================================"
 }
 
 # ---------- DAEMON ----------
 install_daemon() {
+
+  read -p "⚙️ Are you sure you want to install? (yes/no): " confirm
+[[ "$confirm" == "yes" ]] || { echo "❌ Installation cancelled"; exit 1; }
+
   echo "⚙️ Installing Draco Daemon..."
 
   apt update -y
