@@ -48,7 +48,6 @@ echo "📂 Unziping Panel Files.."
   echo "▶️ Creating User For Panel"
   
   npm run createUser
-🚀 Launching setup process
 echo "🚀 Launching Panel"
 
   pm2 start index.js --name panel
@@ -117,13 +116,11 @@ install_daemon() {
 
   eval $FIXED_CMD
 
-  pm2 start index.js --name draco-daemon
-  pm2 save
-  pm2 startup
+  
 
-  echo
+  echo " To Make Online 🚀 Your Node Do (node .)"
   echo "======================================"
-  echo "✅ DAEMON INSTALLED & RUNNING"
+  echo "✅ DAEMON INSTALLED "
   echo "⏱️ Subscribe TO ITZ_YTANSH"
   echo "======================================"
 }
