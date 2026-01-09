@@ -1,118 +1,99 @@
 #!/bin/bash
 
-set -e
+# ========== COLORS ==========
+BOLD="\e[1m"
+CYAN="\e[36m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+RED="\e[31m"
+RESET="\e[0m"
 
 clear
 
-# ================== BANNER ==================
-echo -e "\033[1;36m"
+# ========== BANNER ==========
+echo -e "${BOLD}${CYAN}"
 echo "██╗████████╗███████╗     ██╗   ██╗████████╗ █████╗ ███╗   ██╗███████╗██╗  ██╗"
 echo "██║╚══██╔══╝╚══███╔╝     ╚██╗ ██╔╝╚══██╔══╝██╔══██╗████╗  ██║██╔════╝██║  ██║"
 echo "██║   ██║     ███╔╝       ╚████╔╝    ██║   ███████║██╔██╗ ██║███████╗███████║"
 echo "██║   ██║    ███╔╝         ╚██╔╝     ██║   ██╔══██║██║╚██╗██║╚════██║██╔══██║"
 echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
-echo -e "\033[1;33m        🚀 ITZ_YTANSH TERYX PANEL&DEAMON INSTALLER 🚀"
-echo -e "\033[0m"
-echo ""
+echo -e "${RESET}"
+echo -e "${BOLD}${YELLOW}🚀 ITZ_YTANSH PANEL & DAEMON ONE-CLICK INSTALLER${RESET}\n"
 
-# ================== CHECK ROOT ==================
-if [ "$EUID" -ne 0 ]; then
-  echo "❌ Please run as root"
-  exit 1
-fi
+# ========== MENU ==========
+echo -e "${GREEN}[1] Install Teryx Panel"
+echo -e "[2] Install Teryx Daemon${RESET}\n"
+read -p "👉 Choose option (1/2): " opt
 
-# ================== MENU ==================
-echo "Choose what to install:"
-echo "1️⃣  Install PANEL (Teryx Panel)"
-echo "2️⃣  Install DAEMON (Node)"
-echo "3️⃣  Install BOTH (Panel + Daemon)"
-echo ""
-read -p "Enter choice [1/2/3]: " choice
+# ========== COMMON DEPENDENCIES ==========
+install_common() {
+  echo -e "${CYAN}🔧 Installing dependencies...${RESET}"
+  apt update -y
+  apt install -y git curl unzip zip
+  curl -fsSL https://deb.nodesource.com/setup_23.x | bash -
+  apt install -y nodejs
+  npm install -g pm2
+}
 
-# ================== COMMON ==================
-echo "🔄 Updating system..."
-apt update -y && apt upgrade -y
-
-echo "📦 Installing dependencies..."
-apt install -y curl git unzip zip build-essential
-
-curl -fsSL https://deb.nodesource.com/setup_23.x | bash -
-apt install -y nodejs
-
-npm install -g pm2
-
-# ================== PANEL ==================
+# ========== PANEL ==========
 install_panel() {
-  echo "📥 Installing Teryx Panel..."
-  git clone https://github.com/teryxlabs/v4panel panel
-  cd panel
+  install_common
 
-  echo "📦 Installing panel dependencies..."
+  echo -e "${CYAN}📥 Cloning Teryx Panel...${RESET}"
+  rm -rf v4panel
+  git clone https://github.com/teryxlabs/v4panel.git
+
+  cd v4panel || exit 1
+
+  echo -e "${CYAN}📦 Installing panel dependencies...${RESET}"
   npm install
 
-  echo "🌱 Seeding database..."
+  echo -e "${CYAN}🌱 Seeding database...${RESET}"
   npm run seed
 
-  echo "👤 Creating admin user..."
+  echo -e "${CYAN}👤 Create admin account (email/username/password)...${RESET}"
   npm run createUser
 
-  pm2 start node --name teryx-panel -- .
-  cd ..
+  read -p "▶️ Start panel now? (yes/no): " startp
+  if [[ "$startp" == "yes" ]]; then
+    pm2 start node --name teryx-panel -- .
+    pm2 save
+    echo -e "${GREEN}✅ Panel started successfully 🎉${RESET}"
+    pm2 list
+  else
+    echo -e "${YELLOW}⏸ Panel installed but not started${RESET}"
+  fi
 }
 
-# ================== DAEMON ==================
+# ========== DAEMON ==========
 install_daemon() {
-  echo "📥 Installing Teryx Daemon..."
-  git clone https://github.com/teryxlabs/daemon daemon
-  cd daemon
+  install_common
 
-  echo "📦 Installing daemon dependencies..."
+  echo -e "${CYAN}📥 Cloning Teryx Daemon...${RESET}"
+  rm -rf daemon
+  git clone https://github.com/teryxlabs/daemon.git
+
+  cd daemon || exit 1
+
+  echo -e "${CYAN}📦 Installing daemon dependencies...${RESET}"
   npm install
 
-  pm2 start index.js --name teryx-daemon
-  cd ..
+  echo -e "${CYAN}⚙️ Configure daemon files as required (.env, node id, etc)${RESET}"
+
+  read -p "▶️ Start daemon now? (yes/no): " startd
+  if [[ "$startd" == "yes" ]]; then
+    pm2 start node --name teryx-daemon -- .
+    pm2 save
+    echo -e "${GREEN}✅ Daemon started successfully 🚀${RESET}"
+    pm2 list
+  else
+    echo -e "${YELLOW}⏸ Daemon installed but not started${RESET}"
+  fi
 }
 
-# ================== RUN INSTALL ==================
-case $choice in
+# ========== RUN ==========
+case $opt in
   1) install_panel ;;
   2) install_daemon ;;
-  3) install_panel && install_daemon ;;
-  *) echo "❌ Invalid choice" && exit 1 ;;
+  *) echo -e "${RED}❌ Invalid option${RESET}" ;;
 esac
-
-# ================== USER CONFIG ==================
-echo ""
-echo "🧑‍💻 FINAL CONFIGURATION"
-read -p "📧 Enter Admin Email: " ADMIN_EMAIL
-read -p "👤 Enter Username: " ADMIN_USER
-read -s -p "🔐 Enter Password: " ADMIN_PASS
-echo ""
-
-cat <<EOF > itz_ytansh_config.txt
-EMAIL=$ADMIN_EMAIL
-USERNAME=$ADMIN_USER
-PASSWORD=$ADMIN_PASS
-EOF
-
-echo "✅ Credentials saved locally (itz_ytansh_config.txt)"
-
-# ================== START CONFIRM ==================
-echo ""
-read -p "🚀 Start Panel & Daemon now? (yes/no): " startnow
-
-if [[ "$startnow" == "yes" ]]; then
-  pm2 save
-  pm2 startup
-  pm2 list
-
-  echo ""
-  echo "🎉 SUCCESSFULLY STARTED!"
-  echo "🟢 Panel & Daemon running"
-  echo "🔥 Managed by ITZ_YTANSH"
-else
-  echo "⏹️ Installation complete. Not started."
-fi
-
-echo ""
-echo "✅ DONE | ITZ_YTANSH GOD LEVEL INSTALLER 😈🔥"
