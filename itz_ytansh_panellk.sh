@@ -2,97 +2,104 @@
 set -e
 
 clear
-echo "========================================="
-echo "   ITZ_YTANSH – Teryx Panel & Daemon"
-echo "========================================="
+echo -e "\e[1;97m"
+echo "██╗████████╗███████╗     ██╗   ██╗████████╗ █████╗ ███╗   ██╗███████╗██╗  ██╗"
+echo "██║╚══██╔══╝╚══███╔╝     ╚██╗ ██╔╝╚══██╔══╝██╔══██╗████╗  ██║██╔════╝██║  ██║"
+echo "██║   ██║     ███╔╝       ╚████╔╝    ██║   ███████║██╔██╗ ██║███████╗███████║"
+echo "██║   ██║    ███╔╝         ╚██╔╝     ██║   ██╔══██║██║╚██╗██║╚════██║██╔══██║"
+echo "██║   ██║   ███████╗        ██║      ██║   ██║  ██║██║ ╚████║███████║██║  ██║"
+echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
+echo -e "\e[0m"
+echo
+echo "=========== ITZ_YTANSH Teryx Panel & Daemon Installer ==========="
 echo "1) Install Teryx Panel"
 echo "2) Install Draco Daemon"
-echo "3) Install BOTH (Panel + Daemon)"
+echo "3) Subscribe to ITZ_YTANSH ❤️"
 echo "4) Exit"
-echo "========================================="
+echo "================================================================"
 read -p "Select option: " opt
-
-# ---------- COMMON ----------
-apt update -y
-apt install -y curl git zip unzip
-
-if ! command -v node >/dev/null 2>&1; then
-  curl -sL https://deb.nodesource.com/setup_23.x | bash -
-  apt install -y nodejs
-fi
-
-npm install -g pm2
 
 # ---------- PANEL ----------
 install_panel() {
   echo "🚀 Installing Teryx Panel..."
 
-  cd /opt
-  git clone https://github.com/teryxlabs/v4panel.git
+  apt update -y
+  curl -sL https://deb.nodesource.com/setup_23.x | bash -
+  apt-get install -y nodejs git zip unzip
+  npm install -g pm2
+
+  git clone https://github.com/teryxlabs/v4panel
   cd v4panel
+
+  apt install zip -y
+  unzip panel.zip || true
 
   npm install
   npm run seed
-
-  echo "👤 Create Admin User"
   npm run createUser
-
-  # generate panel key
-  PANEL_KEY=$(openssl rand -hex 32)
-
-  cat > config.json <<EOF
-{
-  "panelKey": "$PANEL_KEY",
-  "port": 3000
-}
-EOF
 
   pm2 start index.js --name teryx-panel
   pm2 save
-  pm2 startup systemd -u root --hp /root
+  pm2 startup
 
-  echo "✅ Panel Installed"
-  echo "🔑 PANEL API KEY: $PANEL_KEY"
+  echo
+  echo "======================================"
+  echo "✅ TERYX PANEL INSTALLED SUCCESSFULLY"
+  echo "🌐 Panel is now running with PM2 (24/7)"
+  echo "💡 Use: pm2 logs teryx-panel"
+  echo "======================================"
 }
 
 # ---------- DAEMON ----------
 install_daemon() {
   echo "⚙️ Installing Draco Daemon..."
 
-  cd /opt
-  git clone https://github.com/dragonlabsdev/daemon.git
+  apt update -y
+  apt install -y nodejs git zip unzip
+  npm install -g pm2
+
+  git clone https://github.com/dragonlabsdev/daemon
   cd daemon
+
+  apt install zip -y
+  unzip daemon.zip || true
+  cd daemon || true
 
   npm install
 
-  read -p "🌐 Enter PANEL URL (http://IP:3000): " PANEL_URL
-  read -p "🔑 Enter PANEL API KEY: " PANEL_KEY
+  echo
+  echo "🔑 ENTER PANEL TOKEN TO START DAEMON"
+  echo -e "\e[90mExample: 9f3a1c8e2b6d4a0f8c9e7d1b3a5f6c2d\e[0m"
+  read -p "Paste Panel Token: " PANEL_TOKEN
 
-  DAEMON_KEY=$(openssl rand -hex 32)
-
-  cat > .env <<EOF
-PANEL_URL=$PANEL_URL
-REMOTE_KEY=$PANEL_KEY
-DAEMON_KEY=$DAEMON_KEY
-PORT=8080
-EOF
+  echo "REMOTE_KEY=$PANEL_TOKEN" > .env
 
   pm2 start index.js --name draco-daemon
   pm2 save
+  pm2 startup
 
-  echo "✅ Daemon Installed"
-  echo "🔑 DAEMON KEY: $DAEMON_KEY"
-  echo "👉 Paste this DAEMON KEY in Panel config"
+  echo
+  echo "======================================"
+  echo "✅ DAEMON STARTED SUCCESSFULLY"
+  echo "⚙️ Running with PM2 (24/7)"
+  echo "💡 Use: pm2 logs draco-daemon"
+  echo "======================================"
 }
 
-# ---------- MENU LOGIC ----------
+# ---------- SUBSCRIBE ----------
+subscribe() {
+  clear
+  echo
+  echo "❤️ SUPPORT & SUBSCRIBE ❤️"
+  echo
+  echo "👉 https://www.youtube.com/@ITZ_YT_ANSH_OFFICIAL"
+  echo
+}
+
 case $opt in
   1) install_panel ;;
   2) install_daemon ;;
-  3)
-     install_panel
-     install_daemon
-     ;;
+  3) subscribe ;;
   4) exit ;;
   *) echo "❌ Invalid option" ;;
 esac
