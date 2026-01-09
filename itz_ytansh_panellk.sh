@@ -66,10 +66,22 @@ echo "🚀 Launching Panel"
 }
 
 # ---------- DAEMON ----------
+Node() {
+
 echo
-echo "🛠️  Node / Daemon is currently not available"
-echo "⏳ The service is being initialized. Please wait..."
-echo "🛡️  Bye Bye"
+echo "🚧 Node / Daemon is not available yet"
+echo "⚙️  Working on it, please wait..."
+}
+
+spinner='|/-\'
+for i in {1..20}; do
+  printf "\r⏳ Initializing %s" "${spinner:i%4:1}"
+  sleep 0.2
+done
+
+printf "\r✅ Status: Still in progress, please check back soon.\n"
+echo
+
 # ---------- SUBSCRIBE ----------
 subscribe() {
   clear
