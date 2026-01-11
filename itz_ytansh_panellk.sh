@@ -79,7 +79,7 @@ for i in {1..20}; do
   sleep 0.2
 done
 
-printf "\r✅ Status: Still in progress, please check back soon.\n"
+printf "\r✅ Wait...\n"
 echo
 
 # ---------- SUBSCRIBE ----------
