@@ -10,86 +10,71 @@ echo "██║   ██║    ███╔╝         ╚██╔╝     █�
 echo "██║   ██║   ███████╗        ██║      ██║   ██║  ██║██║ ╚████║███████║██║  ██║"
 echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
 echo -e "\e[0m"
+
 echo
-echo "+=========== ITZ_YTANSH  Hosting Installer (CodeSandBox) ===========+"
+echo "+=========== ITZ_YTANSH Hosting Installer (CodeSandBox) ===========+"
 echo "1) 🔥 Install Panel"
-echo "2) ⚡ Install Node"
-echo "3) ❤️ Subscribe to ITZ_YTANSH "
+echo "2) ⚡ Install Node (Coming Soon)"
+echo "3) ❤️ Subscribe"
 echo "4) ➡️ Exit"
-echo "+================================================================+"
-read -p "Select option: " opt
+echo "+==================================================+"
+read -rp "Select option: " opt
 
-# ---------- PANEL ----------
+spinner() {
+  spin='|/-\'
+  for i in {1..15}; do
+    printf "\r⏳ Processing %s" "${spin:i%4:1}"
+    sleep 0.2
+  done
+  echo
+}
+
 install_panel() {
+  read -rp "⚙️ Are you sure? (yes/no): " confirm
+  [[ "$confirm" == "yes" ]] || { echo "❌ Cancelled"; exit 1; }
 
-  read -p "⚙️ Are you sure you want to install? (yes/no): " confirm
-[[ "$confirm" == "yes" ]] || { echo "❌ Installation cancelled"; exit 1; }
+  spinner
 
-  echo "🚀 Installing Panel..."
-
+  echo "🚀 Installing Dependencies..."
   apt update -y
-  curl -sL https://deb.nodesource.com/setup_23.x | bash -
-  apt-get install -y nodejs git zip unzip
+  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  apt install -y nodejs git zip unzip
   npm install -g pm2
 
-echo "⚙️ Cloning Panel Files...."
-
+  echo "📥 Cloning Panel..."
   git clone https://github.com/teryxlabs/v4panel
   cd v4panel
 
-echo "📂 Unziping Panel Files.."
-
-  apt install zip -y
-  unzip panel.zip || true
-
+  echo "📦 Installing Node Modules..."
   npm install
+
+  echo "🌱 Seeding Database..."
   npm run seed
 
-  echo "▶️ Creating User For Panel"
-  
-  npm run createUser
-echo "🚀 Launching Panel"
+  echo "👤 Create Panel User"
+  npm run createUser || true
 
+  echo "▶️ Starting Panel..."
   pm2 start index.js --name panel
   pm2 save
-  pm2 startup
+  pm2 startup systemd -u root --hp /root
 
   echo
   echo "======================================"
-  echo "✅  PANEL INSTALLED SUCCESSFULLY"
-  echo "🌐 Panel is now Live In Port 3000"
-  echo "💡 Use: pm2 list For 💥 Info"
-  echo "👑 Owner Of Panel: **HopingBoyz**"
+  echo "✅ PANEL INSTALLED SUCCESSFULLY"
+  echo "🌐 URL: http://SERVER-IP:3000"
+  echo "🧠 PM2: pm2 list"
   echo "======================================"
-
-  echo "🧩 For Node Relauch The Cmd!"
 }
 
-# ---------- DAEMON ----------
 install_node() {
-
-echo
-echo "🚧 Node / Daemon is not available yet"
-echo "⚙️  Working on it, please wait..."
+  echo "🚧 Node / Daemon Coming Soon"
 }
 
-spinner='|/-\'
-for i in {1..20}; do
-  printf "\r⏳ Initializing %s" "${spinner:i%4:1}"
-  sleep 0.2
-done
-
-printf "\r✅ Wait...\n"
-echo
-
-# ---------- SUBSCRIBE ----------
 subscribe() {
   clear
-  echo
-  echo "❤️ SUPPORT & SUBSCRIBE ❤️"
-  echo
+  echo "❤️ SUPPORT ME ❤️"
   echo "👉 https://www.youtube.com/@ITZ_YT_ANSH_OFFICIAL"
-  echo "Thanks For Using Cmd Also!!"
 }
 
 case $opt in
@@ -97,5 +82,5 @@ case $opt in
   2) install_node ;;
   3) subscribe ;;
   4) exit ;;
-  *) echo "❌ Invalid option" ;;
+  *) echo "❌ Invalid Option" ;;
 esac
