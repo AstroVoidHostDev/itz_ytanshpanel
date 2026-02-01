@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Root check
+# Root Check
 if [ "$EUID" -ne 0 ]; then
   echo "❌ Run as root: sudo bash install.sh"
   exit 1
@@ -18,83 +18,90 @@ echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚
 echo -e "\e[0m"
 
 echo
-echo "+=========== ITZ_YTANSH Hosting Installer ===========+"
+echo "+=========== ITZ_YTANSH GOD INSTALLER ===========+"
 echo "1) 🔥 Install Panel"
-echo "2) ⚡ Install Node (Coming Soon)"
+echo "2) ⚡ Install Node / Daemon (FULL AUTO)"
 echo "3) ❤️ Subscribe"
 echo "4) ➡️ Exit"
-echo "+==================================================+"
+echo "+================================================+"
 read -rp "Select option: " opt
 
 spinner() {
-  spin='|/-\'
-  for i in {1..18}; do
+  spin='|/-\\'
+  for i in {1..20}; do
     printf "\r⏳ Processing %s" "${spin:i%4:1}"
     sleep 0.12
   done
   echo
 }
 
-install_panel() {
-  read -rp "⚙️ Are you sure? (yes/no): " confirm
-  [[ "$confirm" == "yes" ]] || { echo "❌ Cancelled"; exit 1; }
-
+install_node() {
+  echo
+  echo "⚡ INSTALLING NODE / DAEMON..."
   spinner
 
-  echo "🚀 Installing Dependencies..."
+  echo "📦 Installing Dependencies..."
   apt update -y
   apt install -y curl git zip unzip software-properties-common
 
-  echo "⬇️ Installing NodeJS 20..."
-  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-  apt install -y nodejs
+  echo "⬇️ Installing NodeJS 20 if missing..."
+  if ! command -v node &>/dev/null; then
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt install -y nodejs
+  fi
 
   echo "📦 Installing PM2..."
   npm install -g pm2
 
-  echo "📥 Cloning Panel Repo..."
-  if [ ! -d "v4panel" ]; then
-    git clone https://github.com/teryxlabs/v4panel
+  echo "📥 Cloning Daemon Repo..."
+  if [ ! -d "daemon" ]; then
+    git clone https://github.com/dragonlabsdev/daemon
+  else
+    echo "⚠️ Daemon folder exists — updating"
+    cd daemon && git pull && cd ..
   fi
 
-  cd v4panel || exit
+  cd daemon || exit
 
-  echo "📦 Extracting panel.zip if exists..."
-  if [ -f panel.zip ]; then
-    unzip -o panel.zip
+  echo "📦 Extracting daemon.zip..."
+  if [ -f daemon.zip ]; then
+    unzip -o daemon.zip
+    cd daemon || true
   fi
 
-  echo "🧹 Cleaning old node modules..."
-  rm -rf node_modules package-lock.json
-
-  echo "📦 Installing Node Modules (Fix npm errors)..."
-  npm cache clean --force
+  echo "📦 Installing Node Modules..."
   npm install --unsafe-perm || npm install --legacy-peer-deps
 
-  echo "🌱 Running Seed (safe mode)..."
-  npm run seed || echo "⚠️ Seed skipped (not required)"
+  echo
+  echo "📜 PASTE YOUR CONFIGURATION BELOW"
+  echo "----------------------------------"
+  echo "When done, press CTRL+X then Y then ENTER"
+  echo
 
-  echo "👤 Create Panel User..."
-  npm run createUser || true
+  cat > config.json
 
-  echo "▶️ Starting Panel..."
-  pm2 delete panel 2>/dev/null || true
-  pm2 start index.js --name panel
+  echo "▶️ Starting Node..."
+  pm2 delete daemon 2>/dev/null || true
+  pm2 start index.js --name daemon
   pm2 save
-  pm2 startup systemd -u root --hp /root
+  pm2 startup
 
-  SERVER_IP=$(curl -s ifconfig.me || echo "YOUR-SERVER-IP")
+  SERVER_IP=$(curl -s ifconfig.me || hostname -I | awk '{print $1}')
 
   echo
   echo "======================================"
-  echo "✅ PANEL INSTALLED SUCCESSFULLY"
-  echo "🌐 URL: http://localhost:3000"
-  echo "🧠 PM2: pm2 list"
+  echo "✅ NODE INSTALLED SUCCESSFULLY"
+  echo "🌐 Node Online: http://$SERVER_IP"
+  echo "⚡ PM2 Status: pm2 list"
   echo "======================================"
+
+  echo
+  echo "❤️ Subscribe To Itz_Ytansh"
+  echo "👉 https://www.youtube.com/@ITZ_YT_ANSH_OFFICIAL"
 }
 
-install_node() {
-  echo "🚧 Node / Daemon Coming Soon"
+install_panel() {
+  echo "🔥 Panel Installer Coming Soon"
 }
 
 subscribe() {
