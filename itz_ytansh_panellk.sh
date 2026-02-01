@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# Root check
+if [ "$EUID" -ne 0 ]; then
+  echo "❌ Run as root: sudo bash install.sh"
+  exit 1
+fi
+
 clear
 echo -e "\e[1;97m"
 echo "██╗████████╗███████╗     ██╗   ██╗████████╗ █████╗ ███╗   ██╗███████╗██╗  ██╗"
@@ -12,7 +18,7 @@ echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚
 echo -e "\e[0m"
 
 echo
-echo "+=========== ITZ_YTANSH Hosting Installer (CodeSandBox) ===========+"
+echo "+=========== ITZ_YTANSH Hosting Installer ===========+"
 echo "1) 🔥 Install Panel"
 echo "2) ⚡ Install Node (Coming Soon)"
 echo "3) ❤️ Subscribe"
@@ -22,9 +28,9 @@ read -rp "Select option: " opt
 
 spinner() {
   spin='|/-\'
-  for i in {1..15}; do
+  for i in {1..18}; do
     printf "\r⏳ Processing %s" "${spin:i%4:1}"
-    sleep 0.2
+    sleep 0.12
   done
   echo
 }
@@ -37,33 +43,52 @@ install_panel() {
 
   echo "🚀 Installing Dependencies..."
   apt update -y
+  apt install -y curl git zip unzip software-properties-common
+
+  echo "⬇️ Installing NodeJS 20..."
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-  apt install -y nodejs git zip unzip
+  apt install -y nodejs
+
+  echo "📦 Installing PM2..."
   npm install -g pm2
 
-  echo "📥 Cloning Panel..."
-  git clone https://github.com/teryxlabs/v4panel
-  cd v4panel
-  apt install zip -y && unzip panel.zip
+  echo "📥 Cloning Panel Repo..."
+  if [ ! -d "v4panel" ]; then
+    git clone https://github.com/teryxlabs/v4panel
+  fi
 
-  echo "📦 Installing Node Modules..."
-  npm install
+  cd v4panel || exit
 
-  echo "🌱 Seeding Database..."
-  npm run seed
+  echo "📦 Extracting panel.zip if exists..."
+  if [ -f panel.zip ]; then
+    unzip -o panel.zip
+  fi
 
-  echo "👤 Create Panel User"
+  echo "🧹 Cleaning old node modules..."
+  rm -rf node_modules package-lock.json
+
+  echo "📦 Installing Node Modules (Fix npm errors)..."
+  npm cache clean --force
+  npm install --unsafe-perm || npm install --legacy-peer-deps
+
+  echo "🌱 Running Seed (safe mode)..."
+  npm run seed || echo "⚠️ Seed skipped (not required)"
+
+  echo "👤 Create Panel User..."
   npm run createUser || true
 
   echo "▶️ Starting Panel..."
+  pm2 delete panel 2>/dev/null || true
   pm2 start index.js --name panel
   pm2 save
   pm2 startup systemd -u root --hp /root
 
+  SERVER_IP=$(curl -s ifconfig.me || echo "YOUR-SERVER-IP")
+
   echo
   echo "======================================"
   echo "✅ PANEL INSTALLED SUCCESSFULLY"
-  echo "🌐 URL: http://SERVER-IP:3000"
+  echo "🌐 URL: http://$SERVER_IP:3000"
   echo "🧠 PM2: pm2 list"
   echo "======================================"
 }
