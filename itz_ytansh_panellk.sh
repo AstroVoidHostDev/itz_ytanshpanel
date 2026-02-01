@@ -18,9 +18,9 @@ echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚
 echo -e "\e[0m"
 
 echo
-echo "+=========== ITZ_YTANSH GOD INSTALLER ===========+"
+echo "+=========== ITZ_YTANSH HOSTING INSTALLER ===========+"
 echo "1) 🔥 Install Panel"
-echo "2) ⚡ Install Node / Daemon (FULL AUTO)"
+echo "2) ⚡ Install Node / Daemon (LAUCHED)"
 echo "3) ❤️ Subscribe"
 echo "4) ➡️ Exit"
 echo "+================================================+"
@@ -57,7 +57,7 @@ install_node() {
   if [ ! -d "daemon" ]; then
     git clone https://github.com/dragonlabsdev/daemon
   else
-    echo "⚠️ Daemon folder exists — updating"
+    echo "⚠️ Updating daemon..."
     cd daemon && git pull && cd ..
   fi
 
@@ -73,12 +73,30 @@ install_node() {
   npm install --unsafe-perm || npm install --legacy-peer-deps
 
   echo
-  echo "📜 PASTE YOUR CONFIGURATION BELOW"
-  echo "----------------------------------"
-  echo "When done, press CTRL+X then Y then ENTER"
+  echo "📜 PASTE CONFIGURE COMMAND BELOW"
+  echo "Example:"
+  echo "npm run configure -- --panel http://xxxxx-3000.csb.app --key xxxxxxxx"
   echo
 
-  cat > config.json
+  read -rp "👉 Paste here: " CONFIG_CMD
+
+  PANEL_URL=$(echo "$CONFIG_CMD" | grep -oP '(?<=--panel )\S+')
+  PANEL_KEY=$(echo "$CONFIG_CMD" | grep -oP '(?<=--key )\S+')
+
+  if [[ -z "$PANEL_URL" || -z "$PANEL_KEY" ]]; then
+    echo "❌ Invalid command format"
+    exit 1
+  fi
+
+  FIXED_PANEL="http://localhost:3000"
+
+  echo
+  echo "🔁 Converting Panel URL:"
+  echo "❌ $PANEL_URL"
+  echo "✅ $FIXED_PANEL"
+
+  echo "⚙️ Running configure..."
+  npm run configure -- --panel "$FIXED_PANEL" --key "$PANEL_KEY"
 
   echo "▶️ Starting Node..."
   pm2 delete daemon 2>/dev/null || true
