@@ -1,9 +1,14 @@
 #!/bin/bash
 set -e
 
+YELLOW="\e[1;33m"
+GREEN="\e[1;32m"
+RED="\e[1;31m"
+RESET="\e[0m"
+
 # Root Check
 if [ "$EUID" -ne 0 ]; then
-  echo "❌ Run as root: sudo bash install.sh"
+  echo -e "${RED}❌ Run as root: sudo bash install.sh${RESET}"
   exit 1
 fi
 
@@ -15,7 +20,7 @@ echo "██║   ██║     ███╔╝       ╚████╔╝    �
 echo "██║   ██║    ███╔╝         ╚██╔╝     ██║   ██╔══██║██║╚██╗██║╚════██║██╔══██║"
 echo "██║   ██║   ███████╗        ██║      ██║   ██║  ██║██║ ╚████║███████║██║  ██║"
 echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝"
-echo -e "\e[0m"
+echo -e "\e[0m"         "❤️Subscribe For 2K Subs❤️"
 
 echo
 echo "+=========== ITZ_YTANSH HOSTING INSTALLER ===========+"
@@ -47,7 +52,7 @@ fix_node() {
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
   apt install -y nodejs
 
-  echo "✅ Node & npm fixed"
+  echo -e "${GREEN}✅ Node & npm fixed${RESET}"
 }
 
 # ================= NODE INSTALL =================
@@ -73,17 +78,16 @@ install_node() {
   npm install --unsafe-perm || npm install --legacy-peer-deps
 
   echo
-  echo "📜 PASTE CONFIGURE COMMAND BELOW"
-  echo "npm run configure -- --panel http://xxxxx --key xxxxx"
+  echo -e "${YELLOW}📜 Example:${RESET} npm run configure -- --panel http://panel-url --key PANEL_KEY_HERE"
   echo
 
-  read -rp "👉 Paste here: " CONFIG_CMD
+  read -rp "👉 Paste configure command: " CONFIG_CMD
 
   PANEL_URL=$(echo "$CONFIG_CMD" | sed -n 's/.*--panel \([^ ]*\).*/\1/p')
   PANEL_KEY=$(echo "$CONFIG_CMD" | sed -n 's/.*--key \([^ ]*\).*/\1/p')
 
   if [[ -z "$PANEL_URL" || -z "$PANEL_KEY" ]]; then
-    echo "❌ Invalid configure command"
+    echo -e "${RED}❌ Invalid configure command${RESET}"
     exit 1
   fi
 
@@ -98,8 +102,8 @@ install_node() {
 
   SERVER_IP=$(curl -s ifconfig.me || curl -s ipinfo.io/ip || hostname -I | awk '{print $1}')
 
-  echo "✅ NODE INSTALLED"
-  echo "🌐 Node Running: http://$SERVER_IP"
+  echo -e "${GREEN}✅ NODE INSTALLED${RESET}"
+  echo "🌐 Node Running: http://localhost:3002"
 }
 
 # ================= DASHBOARD INSTALL =================
@@ -108,7 +112,6 @@ install_dashboard() {
   spinner
 
   fix_node
-
   apt install -y curl git zip unzip nano
 
   rm -rf dash
@@ -118,18 +121,24 @@ install_dashboard() {
   unzip -o dashboard.zip
   cd dash || exit
 
+  echo
   echo "⚙️ DASHBOARD CONFIG SETUP"
+  echo -e "${YELLOW}Examples shown in yellow for help${RESET}"
+  echo
 
-  read -rp "👉 Panel URL: " PANEL_URL
-  read -rp "👉 Panel API Key: " PANEL_KEY
-  read -rp "👉 Hosting Discord Server: " DISCORD_SERVER
-  read -rp "👉 Discord Client ID: " DISCORD_CLIENT_ID
-  read -rp "👉 Discord Client Secret: " DISCORD_CLIENT_SECRET
+  read -rp "👉 Panel URL (${YELLOW}http://localhost:3000${RESET}): " PANEL_URL
+  read -rp "👉 Panel API Key (${YELLOW}hpk_xxxxxxxxx${RESET}): " PANEL_KEY
+  read -rp "👉 Hosting Discord Server (${YELLOW}https://discord.gg/xxxx${RESET}): " DISCORD_SERVER
+  read -rp "👉 Discord Client ID (${YELLOW}123456789012345678${RESET}): " DISCORD_CLIENT_ID
+  read -rp "👉 Discord Client Secret (${YELLOW}xxxxxxxxxxxx${RESET}): " DISCORD_CLIENT_SECRET
+
+  echo -e "${YELLOW}👉 Example Callback URL:${RESET} https://xxxxx-25002.csb.app/callback/discord"
   read -rp "👉 Discord Callback URL: " DISCORD_CALLBACK_URL
-  read -rp "👉 Hosting Name: " APP_NAME
-  read -rp "👉 Hosting Logo URL: " APP_LOGO
-  read -rp "👉 Dashboard URL: " BASE_URL
-  read -rp "👉 Admin Email: " ADMIN_EMAIL
+
+  read -rp "👉 Hosting Name (${YELLOW}MyHosting${RESET}): " APP_NAME
+  read -rp "👉 Hosting Logo URL (${YELLOW}https://logo.png${RESET}): " APP_LOGO
+  read -rp "👉 Dashboard Public URL (${YELLOW}https://xxxxx-25002.csb.app${RESET}): " BASE_URL
+  read -rp "👉 Admin Email (${YELLOW}admin@gmail.com${RESET}): " ADMIN_EMAIL
 
   echo "📝 Writing .env..."
 
@@ -173,13 +182,68 @@ EOF
   pm2 save
   pm2 startup systemd -u root --hp /root
 
-  echo "✅ DASHBOARD INSTALLED"
+  echo -e "${GREEN}✅ DASHBOARD INSTALLED${RESET}"
   echo "🌐 Dashboard Running on Port 25002"
 }
 
 # ================= PANEL =================
 install_panel() {
-  echo "🔥 Panel Installer Coming Soon"
+  echo
+  echo "🔥 INSTALLING PANEL..."
+  spinner
+
+  apt update -y
+  apt install -y curl git zip unzip software-properties-common
+
+  echo "⬇️ Installing NodeJS 20 if missing..."
+  if ! command -v node &>/dev/null; then
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt install -y nodejs
+  fi
+
+  echo "📦 Installing PM2..."
+  npm install -g pm2
+
+  echo "📥 Cloning Panel Repo..."
+  if [ ! -d "v4panel" ]; then
+    git clone https://github.com/teryxlabs/v4panel
+  else
+    cd v4panel && git pull && cd ..
+  fi
+
+  cd v4panel || exit
+
+  echo "📦 Extracting panel.zip..."
+  if [ -f panel.zip ]; then
+    unzip -o panel.zip
+  fi
+
+  echo "🧹 Cleaning node modules..."
+  rm -rf node_modules package-lock.json
+
+  echo "📦 Installing Node Modules..."
+  npm install --unsafe-perm || npm install --legacy-peer-deps
+
+  echo "🌱 Running Seed..."
+  npm run seed || echo "⚠️ Seed skipped"
+
+  echo "👤 Create Panel User..."
+  npm run createUser || true
+
+  echo "▶️ Starting Panel..."
+  pm2 delete panel 2>/dev/null || true
+  pm2 start index.js --name panel
+  pm2 save
+  pm2 startup
+
+  SERVER_IP=$(curl -s ifconfig.me || hostname -I | awk '{print $1}')
+
+  echo
+  echo "======================================"
+  echo "✅ PANEL INSTALLED SUCCESSFULLY"
+  echo "🌐 Panel URL: http://localhost:3000"
+  echo "⚡ PM2: pm2 list"
+  echo "======================================"
 }
 
 # ================= SUBSCRIBE =================
