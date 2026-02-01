@@ -88,7 +88,7 @@ install_panel() {
   echo
   echo "======================================"
   echo "✅ PANEL INSTALLED SUCCESSFULLY"
-  echo "🌐 URL: http://$SERVER_IP:3000"
+  echo "🌐 URL: http://localhost:3000"
   echo "🧠 PM2: pm2 list"
   echo "======================================"
 }
