@@ -31,9 +31,23 @@ spinner() {
   spin='|/-\'
   for i in $(seq 1 20); do
     printf "\r⏳ Processing %s" "${spin:i%4:1}"
-    sleep 0.12
+    sleep 0.10
   done
   echo
+}
+
+# ================= FIX NODE + NPM =================
+fix_node() {
+  echo "🛠️ Fixing Node & npm conflicts..."
+
+  apt remove -y npm nodejs || true
+  apt autoremove -y
+  apt clean
+
+  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  apt install -y nodejs
+
+  echo "✅ Node & npm fixed"
 }
 
 # ================= NODE INSTALL =================
@@ -41,14 +55,9 @@ install_node() {
   echo "⚡ INSTALLING NODE / DAEMON..."
   spinner
 
-  apt update -y
+  fix_node
+
   apt install -y curl git zip unzip software-properties-common
-
-  if ! command -v node &>/dev/null; then
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-    apt install -y nodejs
-  fi
-
   npm install -g pm2
 
   echo "📥 Cloning Daemon Repo..."
@@ -65,8 +74,7 @@ install_node() {
 
   echo
   echo "📜 PASTE CONFIGURE COMMAND BELOW"
-  echo "Example:"
-  echo "npm run configure -- --panel http://xxxxx-3000.csb.app --key xxxxxxxx"
+  echo "npm run configure -- --panel http://xxxxx --key xxxxx"
   echo
 
   read -rp "👉 Paste here: " CONFIG_CMD
@@ -75,13 +83,12 @@ install_node() {
   PANEL_KEY=$(echo "$CONFIG_CMD" | sed -n 's/.*--key \([^ ]*\).*/\1/p')
 
   if [[ -z "$PANEL_URL" || -z "$PANEL_KEY" ]]; then
-    echo "❌ Invalid command format"
+    echo "❌ Invalid configure command"
     exit 1
   fi
 
   FIXED_PANEL="http://localhost:3000"
 
-  echo "⚙️ Running configure..."
   npm run configure -- --panel "$FIXED_PANEL" --key "$PANEL_KEY"
 
   pm2 delete daemon 2>/dev/null || true
@@ -91,8 +98,8 @@ install_node() {
 
   SERVER_IP=$(curl -s ifconfig.me || curl -s ipinfo.io/ip || hostname -I | awk '{print $1}')
 
-  echo "✅ NODE INSTALLED SUCCESSFULLY"
-  echo "🌐 Node Online: http://$SERVER_IP"
+  echo "✅ NODE INSTALLED"
+  echo "🌐 Node Running: http://$SERVER_IP"
 }
 
 # ================= DASHBOARD INSTALL =================
@@ -100,8 +107,9 @@ install_dashboard() {
   echo "🧩 INSTALLING DASHBOARD..."
   spinner
 
-  apt update -y
-  apt install -y curl git zip unzip nano nodejs npm
+  fix_node
+
+  apt install -y curl git zip unzip nano
 
   rm -rf dash
   git clone https://github.com/dragonlabsdev/dash
@@ -110,21 +118,20 @@ install_dashboard() {
   unzip -o dashboard.zip
   cd dash || exit
 
-  echo
   echo "⚙️ DASHBOARD CONFIG SETUP"
 
   read -rp "👉 Panel URL: " PANEL_URL
   read -rp "👉 Panel API Key: " PANEL_KEY
-  read -rp "👉 Hosting Discord Server Link: " DISCORD_SERVER
+  read -rp "👉 Hosting Discord Server: " DISCORD_SERVER
   read -rp "👉 Discord Client ID: " DISCORD_CLIENT_ID
   read -rp "👉 Discord Client Secret: " DISCORD_CLIENT_SECRET
   read -rp "👉 Discord Callback URL: " DISCORD_CALLBACK_URL
   read -rp "👉 Hosting Name: " APP_NAME
   read -rp "👉 Hosting Logo URL: " APP_LOGO
-  read -rp "👉 Dashboard Public URL: " BASE_URL
+  read -rp "👉 Dashboard URL: " BASE_URL
   read -rp "👉 Admin Email: " ADMIN_EMAIL
 
-  echo "📝 Creating .env..."
+  echo "📝 Writing .env..."
 
   cat > .env <<EOF
 PANEL_URL=$PANEL_URL
@@ -139,7 +146,6 @@ DISCORD_SERVER=$DISCORD_SERVER
 DISCORD_CLIENT_ID=$DISCORD_CLIENT_ID
 DISCORD_CLIENT_SECRET=$DISCORD_CLIENT_SECRET
 DISCORD_CALLBACK_URL=$DISCORD_CALLBACK_URL
-PASSWORD_LENGTH=10
 
 SESSION_SECRET=default
 API_KEY=active_key
@@ -167,11 +173,11 @@ EOF
   pm2 save
   pm2 startup systemd -u root --hp /root
 
-  echo "✅ DASHBOARD INSTALLED SUCCESSFULLY"
+  echo "✅ DASHBOARD INSTALLED"
   echo "🌐 Dashboard Running on Port 25002"
 }
 
-# ================= PANEL PLACEHOLDER =================
+# ================= PANEL =================
 install_panel() {
   echo "🔥 Panel Installer Coming Soon"
 }
