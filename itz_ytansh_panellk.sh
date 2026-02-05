@@ -23,7 +23,7 @@ echo "╚═╝   ╚═╝   ╚══════╝        ╚═╝      ╚
 echo -e "\e[0m"         "❤️Subscribe For 2K Subs❤️"
 
 echo
-echo "+=========== ITZ_YTANSH HOSTING INSTALLER ===========+"
+echo "+=========== CSB HOSTING INSTALLER ===========+"
 echo "1) 🔥 Install Panel"
 echo "2) ⚡ Install Node / Daemon"
 echo "3) 🧩 Install Dashboard"
