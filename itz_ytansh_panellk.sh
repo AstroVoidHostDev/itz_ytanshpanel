@@ -52,7 +52,7 @@ fix_node() {
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
   apt install -y nodejs
 
-  echo -e "${GREEN}✅ Node & npm fixed${RESET}"
+  echo -e "${GREEN}✅ Node Installing..${RESET}"
 }
 
 # ================= NODE INSTALL =================
@@ -81,7 +81,7 @@ install_node() {
   echo -e "${YELLOW}📜 Example:${RESET} npm run configure -- --panel http://panel-url --key PANEL_KEY_HERE"
   echo
 
-  read -rp "👉 Paste configure command: " CONFIG_CMD
+  read -rp "👉 Paste configure Key Of Node: " CONFIG_CMD
 
   PANEL_URL=$(echo "$CONFIG_CMD" | sed -n 's/.*--panel \([^ ]*\).*/\1/p')
   PANEL_KEY=$(echo "$CONFIG_CMD" | sed -n 's/.*--key \([^ ]*\).*/\1/p')
@@ -104,6 +104,7 @@ install_node() {
 
   echo -e "${GREEN}✅ NODE INSTALLED${RESET}"
   echo "🌐 Node Running: http://localhost:3002"
+  echo "❤️ SUPPORT ITZ_YTANSH ❤️"
 }
 
 # ================= DASHBOARD INSTALL =================
@@ -122,7 +123,7 @@ install_dashboard() {
   cd dash || exit
 
   echo
-  echo "⚙️ DASHBOARD CONFIG SETUP"
+  echo "⚙️ DASHBOARD CONFIG SETUP STARTED.."
   echo -e "${YELLOW}Examples shown in yellow for help${RESET}"
   echo
 
@@ -184,6 +185,7 @@ EOF
 
   echo -e "${GREEN}✅ DASHBOARD INSTALLED${RESET}"
   echo "🌐 Dashboard Running on Port 25002"
+  echo "❤️ SUPPORT ITZ_YTANSH ❤️"
 }
 
 # ================= PANEL =================
@@ -243,6 +245,7 @@ install_panel() {
   echo "✅ PANEL INSTALLED SUCCESSFULLY"
   echo "🌐 Panel URL: http://localhost:3000"
   echo "⚡ PM2: pm2 list"
+  echo "❤️ SUPPORT ITZ_YTANSH ❤️"
   echo "======================================"
 }
 
