@@ -78,7 +78,8 @@ install_node() {
   npm install --unsafe-perm || npm install --legacy-peer-deps
 
   echo
-  echo -e "${YELLOW}📜 Example:${RESET} npm run configure -- --panel http://panel-url --key PANEL_KEY_HERE"
+  echo -e "${YELLOW}📜 Example:${RESET} npm run configure -- --panel http://panel-url --key PANEL_KEY_HERE "
+  echo -e "${RED}📢 Make Sure To Paste The As It Is Key Without Any Change... Otherwise It Will Not Work"
   echo
 
   read -rp "👉 Paste configure Key Of Node: " CONFIG_CMD
