@@ -79,7 +79,7 @@ install_node() {
 
   echo
   echo -e "${YELLOW}📜 Example:${RESET} npm run configure -- --panel http://panel-url --key PANEL_KEY_HERE "
-  echo -e "${RED}📢 Make Sure To Paste The As It Is Key Without Any Change... Otherwise It Will Not Work"
+  echo -e "${RED}📢 Make Sure To Paste The As It Is Key Without Any Change... Otherwise It Will Not Work${RESET}"
   echo
 
   read -rp "👉 Paste configure Key Of Node: " CONFIG_CMD
